@@ -1,0 +1,19 @@
+{
+  "name": "service-builder",
+  "version": "0.0.1",
+  "description": "Service builder DSL without the boilerplate",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "John Dean <john.holmes.dean@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "get-parameter-names": "^0.3.0",
+    "lodash": "^4.13.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.5.3"
+  }
+}
