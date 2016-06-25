@@ -18,7 +18,7 @@ describe.only('builder test suite', () => {
     });
 
     it('make a builder', () => {
-      expect(d).to.have.keys('withMeat', 'withEgg', 'withJuice');
+      expect(d).to.have.keys('withMeat', 'withEgg', 'withJuice', 'getBreakfast');
     });
 
     it('is a function', () => {
@@ -26,7 +26,7 @@ describe.only('builder test suite', () => {
     })
 
     it('builder makes more builder', () => {
-      expect(d.withMeat()).to.have.keys('withEgg', 'withJuice');
+      expect(d.withMeat()).to.have.keys('withEgg', 'withJuice', 'getBreakfast');
     });
 
     it('eventually exposes a service', () => {
@@ -73,9 +73,9 @@ describe.only('builder test suite', () => {
 
     it('exposing services', () => {
       let builder = d.withMeat();
-      expect(builder).to.have.keys('getMeat', 'withEgg', 'withJuice');
+      expect(builder).to.have.keys('getMeat', 'withEgg', 'withJuice', 'getBreakfast', 'getSolids');
       builder = builder.withEgg();
-      expect(builder).to.have.keys('getMeat', 'getSolids', 'withJuice');
+      expect(builder).to.have.keys('getMeat', 'getSolids', 'withJuice', 'getBreakfast');
       builder = builder.withJuice();
       expect(builder).to.have.keys('getBreakfast', 'getMeat', 'getSolids');
     });
@@ -88,6 +88,43 @@ describe.only('builder test suite', () => {
       });
       expect(d).to.have.keys('getBreakfast', 'getMeat', 'getSolids');
       expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
+    });
+  });
+
+  describe('lazy dependency init', () => {
+    let d;
+
+    beforeEach(() => {
+      d = builder({
+        meal: (meat, veggie) => `${meat} and ${veggie}`,
+        meat: (meatStyle, meatCut) => `${meatStyle} ${meatCut}`,
+        veggie: (veggieStyle, vegatable) => `${veggieStyle} ${vegatable}`
+      }).dsl();
+    });
+
+    it('loads a dependency', () => {
+      expect(d.withVeggieStyle('steamed')
+        .withVegatable('beans')
+        .withMeatCut('steak')
+        .withMeatStyle('grilled')
+        .getMeal())
+        .to.equal('grilled steak and steamed beans');
+    });
+  });
+
+  describe('disallows circular dependency', () => {
+    let d;
+
+    beforeEach(() => {
+      d = builder({
+        a: b => b,
+        b: c => c,
+        c: a => a
+      }).dsl();
+    });
+
+    it('with error message', () => {
+      expect(d.getA).to.throw('Circular dependency error with a at a => c => b');
     });
   });
 });
