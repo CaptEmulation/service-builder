@@ -1,16 +1,15 @@
 'use strict';
 
 const chai = require('chai');
-const dsl = require('../lib');
+const builder = require('../lib');
 const expect = chai.expect;
 
-describe.only('dsl test suite', () => {
-  describe('the shape of a dsl', () => {
+describe.only('builder test suite', () => {
+  describe('the shape of a builder', () => {
     let f, d;
 
     beforeEach(() => {
-      f = dsl();
-      f.define({
+      f = builder({
         breakfast: function (meat, egg, juice) {
           return `${meat} ${egg} eggs ${juice} juice`;
         }
@@ -18,7 +17,7 @@ describe.only('dsl test suite', () => {
       d = f.dsl();
     });
 
-    it('make a dsl', () => {
+    it('make a builder', () => {
       expect(d).to.have.keys('withMeat', 'withEgg', 'withJuice');
     });
 
@@ -26,7 +25,7 @@ describe.only('dsl test suite', () => {
       expect(d.withMeat).to.be.a('function');
     })
 
-    it('dsl makes more dsl', () => {
+    it('builder makes more builder', () => {
       expect(d.withMeat()).to.have.keys('withEgg', 'withJuice');
     });
 
@@ -43,8 +42,7 @@ describe.only('dsl test suite', () => {
     let f, d;
 
     beforeEach(() => {
-      f = dsl();
-      f.define({
+      f = builder({
         foo: () => 'bar'
       });
       d = f.dsl();
@@ -59,8 +57,7 @@ describe.only('dsl test suite', () => {
     let f, d;
 
     beforeEach(() => {
-      f = dsl();
-      f.define({
+      f = builder({
         breakfast: function (meat, egg, juice) {
           return `${meat} ${egg} eggs ${juice} juice`;
         },
@@ -75,12 +72,22 @@ describe.only('dsl test suite', () => {
     });
 
     it('exposing services', () => {
-      let dsl = d.withMeat();
-      expect(dsl).to.have.keys('getMeat', 'withEgg', 'withJuice');
-      dsl = dsl.withEgg();
-      expect(dsl).to.have.keys('getMeat', 'getSolids', 'withJuice');
-      dsl = dsl.withJuice();
-      expect(dsl).to.have.keys('getBreakfast', 'getMeat', 'getSolids');
+      let builder = d.withMeat();
+      expect(builder).to.have.keys('getMeat', 'withEgg', 'withJuice');
+      builder = builder.withEgg();
+      expect(builder).to.have.keys('getMeat', 'getSolids', 'withJuice');
+      builder = builder.withJuice();
+      expect(builder).to.have.keys('getBreakfast', 'getMeat', 'getSolids');
+    });
+
+    it('inject deps', () => {
+      d = f.dsl({
+        meat: 'ham',
+        egg: 'scrambled',
+        juice: 'orange'
+      });
+      expect(d).to.have.keys('getBreakfast', 'getMeat', 'getSolids');
+      expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
     });
   });
 });
