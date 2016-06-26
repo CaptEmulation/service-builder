@@ -1,6 +1,6 @@
 {
   "name": "service-builder",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Service builder DSL without the boilerplate",
   "repository": "https://github.com/CaptEmulation/service-builder",
   "main": "lib/index.js",
