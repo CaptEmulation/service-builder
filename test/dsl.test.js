@@ -4,6 +4,9 @@ const chai = require('chai');
 const builder = require('../lib');
 const expect = chai.expect;
 
+chai.use(require('chai-as-promised'));
+chai.config.includeStack = true;
+
 describe.only('builder test suite', () => {
   describe('the shape of a builder', () => {
     let f, d;
@@ -109,6 +112,36 @@ describe.only('builder test suite', () => {
         .withMeatStyle('grilled')
         .getMeal())
         .to.equal('grilled steak and steamed beans');
+    });
+  });
+
+  describe('async dependencies', () => {
+    it('loads a dependency with all promises', () => {
+      const d = builder({
+        meal: (meat, veggie) => Promise.resolve(`${meat} and ${veggie}`),
+        meat: (meatStyle, meatCut) => Promise.resolve(`${meatStyle} ${meatCut}`),
+        veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`)
+      }).dsl()
+      return expect(d.withVeggieStyle('steamed')
+        .withVegatable('beans')
+        .withMeatCut('steak')
+        .withMeatStyle('grilled')
+        .getMeal())
+        .to.eventually.equal('grilled steak and steamed beans');
+    });
+
+    it('loads a dependency with some promises', () => {
+      const d = builder({
+        meal: (meat, veggie) => `${meat} and ${veggie}`,
+        meat: (meatStyle, meatCut) => Promise.resolve(`${meatStyle} ${meatCut}`),
+        veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`)
+      }).dsl()
+      return expect(d.withVeggieStyle('steamed')
+        .withVegatable('beans')
+        .withMeatCut('steak')
+        .withMeatStyle('grilled')
+        .getMeal())
+        .to.eventually.equal('grilled steak and steamed beans');
     });
   });
 
