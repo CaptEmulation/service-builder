@@ -89,6 +89,41 @@ describe.only('builder test suite', () => {
     });
   });
 
+  describe('multiple services as array', function () {
+    let f,d;
+
+    beforeEach(function () {
+      f = builder({
+        breakfast: [ 'meat', 'egg', 'juice', function breakfast(meat, egg, juice) {
+          return meat + ' ' + egg + ' eggs ' + juice + ' juice';
+        }],
+        solids: ['meat', 'egg', function solids(meat, egg) {
+          return meat + ' ' + egg;
+        }]
+      });
+      d = f.dsl();
+    });
+
+    it('exposing services', function () {
+      var builder = d.withMeat();
+      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids');
+      builder = builder.withEgg();
+      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast');
+      builder = builder.withJuice();
+      expect(builder).to.have.keys('getBreakfast', 'getSolids');
+    });
+
+    it('inject deps', function () {
+      d = f.dsl({
+        meat: 'ham',
+        egg: 'scrambled',
+        juice: 'orange'
+      });
+      expect(d).to.have.keys('getBreakfast', 'getSolids');
+      expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
+    });
+  });
+
   describe('lazy dependency init', () => {
     let d;
 
