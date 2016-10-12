@@ -76,3 +76,40 @@ subDsl.getBreakfast()
   .then(console.log);
 // => Error
 ```
+
+# Surviving Uglification
+
+Minification / uglifying code mangles variable names which breaks being able to resolve dependencies from function names.  The fix is the same as Angular, to use array style dependencies.  The example above can be written as follows in order to survive minifcation.
+
+```
+import builder from 'service-builder;
+
+const dsl = builder({
+  breakfast: ['meat', 'eggs', 'drink', function (meat, eggs, drink) {
+    return `${meat} with ${eggs} and ${drink}`;
+  }],
+  eggs: ['eggStyle', eggStyle => `${eggStyle} eggs`],
+  solids: ['meat', 'egg', (meat, eggs) => [meat, eggs].join(', ')]
+});
+
+// Everything continues to work as before, except you can now safely uglify code
+dsl
+  .withMeat('ham')
+  .withEggStyle('scrambled')
+  .withDrink('orange juice')
+  .getBreakfast();
+// => 'ham with scrambled eggs and orange juice'
+
+const subDsl = dsl
+  .withMeat('ham')
+  .withEggStyle('scrambled');
+
+subDsl.getSolids();
+// => 'ham, scrambled eggs'
+
+subDsl.getEggs();
+// => 'scrambled eggs'
+
+subDsl.getBreakfast();
+// => Error
+```
