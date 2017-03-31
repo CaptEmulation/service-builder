@@ -1,7 +1,7 @@
 'use strict';
 
 var _ = require('lodash');
-var getParameterNames = require('get-parameter-names');
+var getParameterNames = require('@captemulation/get-parameter-names');
 
 function upperFirst(string) {
   return string.charAt(0).toUpperCase() + string.slice(1);
