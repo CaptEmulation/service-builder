@@ -7,7 +7,7 @@ const expect = chai.expect;
 chai.use(require('chai-as-promised'));
 chai.config.includeStack = true;
 
-describe.only('builder test suite', () => {
+describe('builder test suite', () => {
   describe('the shape of a builder', () => {
     let f, d;
 
@@ -21,7 +21,7 @@ describe.only('builder test suite', () => {
     });
 
     it('make a builder', () => {
-      expect(d).to.have.keys('withMeat', 'withEgg', 'withJuice', 'getBreakfast');
+      expect(d).to.have.keys('withMeat', 'withEgg', 'withJuice', 'getBreakfast', 'breakfast');
     });
 
     it('is a function', () => {
@@ -29,15 +29,17 @@ describe.only('builder test suite', () => {
     })
 
     it('builder makes more builder', () => {
-      expect(d.withMeat()).to.have.keys('withEgg', 'withJuice', 'getBreakfast');
+      expect(d.withMeat()).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'breakfast');
     });
 
     it('eventually exposes a service', () => {
-      expect(d.withMeat().withEgg().withJuice()).to.have.keys('getBreakfast');
+      expect(d.withMeat().withEgg().withJuice()).to.have.keys('getBreakfast', 'breakfast');
     });
 
     it('which returns a value', () => {
-      expect(d.withMeat('bacon').withEgg('scrambled').withJuice('orange').getBreakfast()).to.equal('bacon scrambled eggs orange juice');
+      const dsl = d.withMeat('bacon').withEgg('scrambled').withJuice('orange');
+      expect(dsl.getBreakfast()).to.equal('bacon scrambled eggs orange juice');
+      expect(dsl.breakfast).to.equal('bacon scrambled eggs orange juice');
     });
   });
 
@@ -71,11 +73,11 @@ describe.only('builder test suite', () => {
 
     it('exposing services', () => {
       let builder = d.withMeat();
-      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids');
+      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
       builder = builder.withEgg();
-      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast');
+      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
       builder = builder.withJuice();
-      expect(builder).to.have.keys('getBreakfast', 'getSolids');
+      expect(builder).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
     });
 
     it('inject deps', () => {
@@ -84,7 +86,7 @@ describe.only('builder test suite', () => {
         egg: 'scrambled',
         juice: 'orange'
       });
-      expect(d).to.have.keys('getBreakfast', 'getSolids');
+      expect(d).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
       expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
     });
   });
@@ -106,11 +108,11 @@ describe.only('builder test suite', () => {
 
     it('exposing services', function () {
       var builder = d.withMeat();
-      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids');
+      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
       builder = builder.withEgg();
-      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast');
+      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
       builder = builder.withJuice();
-      expect(builder).to.have.keys('getBreakfast', 'getSolids');
+      expect(builder).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
     });
 
     it('inject deps', function () {
@@ -119,7 +121,7 @@ describe.only('builder test suite', () => {
         egg: 'scrambled',
         juice: 'orange'
       });
-      expect(d).to.have.keys('getBreakfast', 'getSolids');
+      expect(d).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
       expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
     });
   });
