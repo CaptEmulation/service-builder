@@ -71,6 +71,7 @@ function factory(services) {
         };
         return prev;
       }, {});
+
       /**
        * Returns a function with attempts to load a service.
        *  - cached value of service will be used if already resolved
@@ -118,11 +119,25 @@ function factory(services) {
       }
 
       // Append services
-      Object.keys(serviceMap).reduce(function (prev, serviceName) {
+      Object.defineProperties(subDsl, Object.keys(serviceMap).reduce(function (memo, serviceName) {
         var service = serviceMap[serviceName];
-        prev[camelPrepend('get', serviceName)] = resolver(serviceName, [serviceName], service);
-        return prev;
-      }, subDsl);
+
+        var getter = resolver(serviceName, [serviceName], service);
+        memo[serviceName] = {
+          get: function get() {
+            return getter();
+          },
+
+          enumerable: true,
+          configurable: false
+        };
+        memo[camelPrepend('get', serviceName)] = {
+          value: getter,
+          enumerable: true,
+          configurable: false
+        };
+        return memo;
+      }, {}));
 
       return subDsl;
     }
