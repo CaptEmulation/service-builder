@@ -17,7 +17,7 @@ describe('builder test suite', () => {
           return `${meat} ${egg} eggs ${juice} juice`;
         }
       });
-      d = f.dsl();
+      d = f.construct();
     });
 
     it('make a builder', () => {
@@ -50,7 +50,7 @@ describe('builder test suite', () => {
       f = builder({
         foo: () => 'bar'
       });
-      d = f.dsl();
+      d = f.construct();
     });
 
     it('exists', () => {
@@ -68,7 +68,7 @@ describe('builder test suite', () => {
         },
         solids: (meat, egg) => `${meat} ${egg}`
       });
-      d = f.dsl();
+      d = f.construct();
     });
 
     it('exposing services', () => {
@@ -81,13 +81,67 @@ describe('builder test suite', () => {
     });
 
     it('inject deps', () => {
-      d = f.dsl({
+      d = f.construct({
         meat: 'ham',
         egg: 'scrambled',
         juice: 'orange'
       });
       expect(d).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
       expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
+    });
+
+    it('obtain deps', () => {
+      d = f.construct({
+        meat: 'ham',
+        egg: 'scrambled',
+        juice: 'orange'
+      });
+      expect(d.$(breakfast => breakfast)).to.equal('ham scrambled eggs orange juice');
+    });
+  });
+
+  describe('bling', function () {
+    it('obtain deps', () => {
+      const f = builder({
+        breakfast: function (meat, egg, juice) {
+          return `${meat} ${egg} eggs ${juice} juice`;
+        },
+      }).construct({
+        meat: 'ham',
+        egg: 'scrambled',
+        juice: 'orange',
+      });
+      expect(f.$(breakfast => breakfast)).to.equal('ham scrambled eggs orange juice');
+    });
+
+    it('obtain construct instance', () => {
+      const f = builder().construct({
+        meat: 'ham',
+      });
+      expect(f.$(meat => meat)).to.equal('ham');
+    });
+
+    it('multiple deps', () => {
+      const f = builder().construct({
+        meat: 'ham',
+        egg: 'scrambled',
+        juice: 'orange',
+      });
+      expect(f.$((meat, egg, juice) => meat + egg + juice)).to.equal('hamscrambledorange');
+    });
+
+    it('async', () => {
+      const f = builder().construct({
+        meat: Promise.resolve('ham'),
+      });
+      return expect(f.$(meat => meat)).to.eventually.equal('ham');
+    });
+
+    it('async failure', () => {
+      const f = builder().construct({
+        meat: Promise.reject(new Error('ham')),
+      });
+      return expect(f.$(meat => meat)).to.rejectedWith(Error);
     });
   });
 
@@ -103,7 +157,7 @@ describe('builder test suite', () => {
           return meat + ' ' + egg;
         }]
       });
-      d = f.dsl();
+      d = f.construct();
     });
 
     it('exposing services', function () {
@@ -116,7 +170,7 @@ describe('builder test suite', () => {
     });
 
     it('inject deps', function () {
-      d = f.dsl({
+      d = f.construct({
         meat: 'ham',
         egg: 'scrambled',
         juice: 'orange'
@@ -134,7 +188,7 @@ describe('builder test suite', () => {
         meal: (meat, veggie) => `${meat} and ${veggie}`,
         meat: (meatStyle, meatCut) => `${meatStyle} ${meatCut}`,
         veggie: (veggieStyle, vegatable) => `${veggieStyle} ${vegatable}`
-      }).dsl();
+      }).construct();
     });
 
     it('loads a dependency', () => {
@@ -153,7 +207,7 @@ describe('builder test suite', () => {
         meal: (meat, veggie) => Promise.resolve(`${meat} and ${veggie}`),
         meat: (meatStyle, meatCut) => Promise.resolve(`${meatStyle} ${meatCut}`),
         veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`)
-      }).dsl()
+      }).construct()
       return expect(d.withVeggieStyle('steamed')
         .withVegatable('beans')
         .withMeatCut('steak')
@@ -167,7 +221,7 @@ describe('builder test suite', () => {
         meal: (meat, veggie) => `${meat} and ${veggie}`,
         meat: (meatStyle, meatCut) => Promise.resolve(`${meatStyle} ${meatCut}`),
         veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`)
-      }).dsl()
+      }).construct()
       return expect(d.withVeggieStyle('steamed')
         .withVegatable('beans')
         .withMeatCut('steak')
@@ -185,7 +239,7 @@ describe('builder test suite', () => {
         a: b => b,
         b: c => c,
         c: a => a
-      }).dsl();
+      }).construct();
     });
 
     it('with error message', () => {
