@@ -7,7 +7,7 @@
 ```
 import builder from 'service-builder;
 
-const dsl = builder({
+const blueprint = builder({
   breakfast: function (meat, eggs, drink) {
     return `${meat} with ${eggs} and ${drink}`;
   },
@@ -15,25 +15,58 @@ const dsl = builder({
   solids: (meat, eggs) => [meat, eggs].join(', ')
 });
 
-dsl
+const factory = blueprint.construct();
+
+factory
   .withMeat('ham')
   .withEggStyle('scrambled')
   .withDrink('orange juice')
   .getBreakfast();
 // => 'ham with scrambled eggs and orange juice'
 
-const subDsl = dsl
-  .withMeat('ham')
+const anotherFactory = blueprint.construct({
+  meat: 'sausage'
+})
   .withEggStyle('scrambled');
 
-subDsl.getSolids();
+anotherFactory.getSolids();
 // => 'ham, scrambled eggs'
 
-subDsl.getEggs();
+anotherFactory.getEggs();
 // => 'scrambled eggs'
 
-subDsl.getBreakfast();
+anotherFactory.getBreakfast();
 // => Error
+```
+# Lazy properties
+Instead of using the getter functions, there are also lazily evaluated properties on the factory
+
+```
+const blueprint = builder({
+  eggs: eggStyle => `${eggStyle} eggs`,
+});
+const factory = blueprint.construct({
+  eggStyle: 'fried',
+});
+console.log(factory.eggs);
+// => 'fried eggs';
+```
+
+# Resolver
+
+`$` is a resolver for dependencies
+
+```
+const blueprint = builder({
+  eggs: eggStyle => `${eggStyle} eggs`,
+  meat: meatStyle => `${meatStyle} steak`,
+});
+const factory = blueprint.construct({
+  eggStyle: 'fried',
+  meatStyle: 'rare',
+});
+console.log(factory.$((meat, eggs) => `${eggs} and ${meat}`));
+// => 'fried eggs and rare steak'
 ```
 
 # Async
@@ -43,7 +76,7 @@ If any dependencies return a promise, then the promise will be resolved before b
 ```
 import builder from 'service-builder;
 
-const dsl = builder({
+const blueprint = builder({
   breakfast: function (meat, eggs, drink) {
     return `${meat} with ${eggs} and ${drink}`;
   },
@@ -52,7 +85,9 @@ const dsl = builder({
   solids: (meat, eggs) => [meat, eggs].join(', ')
 });
 
-dsl
+const factory = blueprint.construct();
+
+factory
   .withMeat('ham')
   .withEggStyle('scrambled')
   .withDrink('orange juice')
@@ -60,21 +95,22 @@ dsl
   .then(console.log);
 // => 'ham with scrambled eggs and orange juice'
 
-const subDsl = dsl
+const anotherFactory = blueprint.construct()
   .withMeat('ham')
   .withEggStyle('scrambled');
 
-subDsl.getSolids()
+anotherFactory.getSolids()
   .then(console.log);
 // => 'ham, scrambled eggs'
 
-subDsl.getEggs()
+anotherFactory.getEggs()
   .then(console.log);
 // => 'scrambled eggs'
 
-subDsl.getBreakfast()
+anotherFactory.getBreakfast()
   .then(console.log);
 // => Error
+
 ```
 
 # Surviving Uglification
@@ -84,7 +120,7 @@ Minification / uglifying code mangles variable names which breaks being able to 
 ```
 import builder from 'service-builder;
 
-const dsl = builder({
+const blueprint = builder({
   breakfast: ['meat', 'eggs', 'drink', function (meat, eggs, drink) {
     return `${meat} with ${eggs} and ${drink}`;
   }],
@@ -92,24 +128,26 @@ const dsl = builder({
   solids: ['meat', 'egg', (meat, eggs) => [meat, eggs].join(', ')]
 });
 
+const factory = blueprint.construct();
+
 // Everything continues to work as before, except you can now safely uglify code
-dsl
+factory
   .withMeat('ham')
   .withEggStyle('scrambled')
   .withDrink('orange juice')
   .getBreakfast();
 // => 'ham with scrambled eggs and orange juice'
 
-const subDsl = dsl
-  .withMeat('ham')
-  .withEggStyle('scrambled');
+const anotherFactory = blueprint.construct()
+  .withMeat('steak')
+  .withEggStyle('pouched');
 
-subDsl.getSolids();
-// => 'ham, scrambled eggs'
+anotherFactory.getSolids();
+// => 'steak, pouched eggs'
 
-subDsl.getEggs();
-// => 'scrambled eggs'
+anotherFactory.getEggs();
+// => 'puched eggs'
 
-subDsl.getBreakfast();
-// => Error
+anotherFactory.getBreakfast();
+// => Error unable to resolve drink at breakfast
 ```
