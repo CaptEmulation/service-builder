@@ -84,6 +84,34 @@ describe('builder test suite', () => {
     });
   });
 
+  describe('no dsl', () => {
+    before(() => {
+      builder.config({
+        dsl: false,
+      });
+    });
+    after(() => {
+      builder.config({
+        dsl: true,
+      });
+    });
+
+    it('Returns a resolver', () => {
+      const b = builder({
+        foo: 'foo',
+      });
+      expect(b.construct()(foo => foo)).to.equal('foo');
+    });
+
+    it('can still use a resolver', () => {
+      const b = builder({
+        foo: $ => $(bar => bar),
+        bar: () => 'bar',
+      });
+      expect(b.construct()(foo => foo)).to.equal('bar');
+    });
+  })
+
   describe('extending', () => {
     it('can define new deps', () => {
       const b = builder({

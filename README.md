@@ -49,7 +49,20 @@ const factory = blueprint.construct({
   eggStyle: 'fried',
 });
 console.log(factory.eggs);
-// => 'fried eggs';
+// => 'fried eggs'
+```
+
+# Implicit properties
+If a non-function non-array is passed in as a dependency, then it will be implicitly wrapped in a function.
+
+```
+const blueprint = builder({
+  foo: bar => `foo${bar}`,
+  bar: 'bar',  
+});
+const factory = blueprint.construct();
+console.log(factory.foo);
+// => 'foobar'
 ```
 
 # Resolver
@@ -66,6 +79,22 @@ const factory = blueprint.construct({
   meatStyle: 'rare',
 });
 console.log(factory.$((meat, eggs) => `${eggs} and ${meat}`));
+// => 'fried eggs and rare steak'
+```
+
+Alternatively, you can forgo the DSL syntax of the constructed factory entirely in favor of a resolver:
+
+```
+builder.config({ dsl: false });
+const blueprint = builder({
+  eggs: eggStyle => `${eggStyle} eggs`,
+  meat: meatStyle => `${meatStyle} steak`,
+});
+const $ = blueprint.construct({
+  eggStyle: 'fried',
+  meatStyle: 'rare',
+});
+console.log($((meat, eggs) => `${eggs} and ${meat}`));
 // => 'fried eggs and rare steak'
 ```
 
