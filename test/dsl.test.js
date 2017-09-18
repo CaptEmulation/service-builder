@@ -58,6 +58,45 @@ describe('builder test suite', () => {
     });
   });
 
+  describe('$ is implicit', () => {
+    it('won\'t allow $ as a dependency', () => {
+      expect(() => builder({
+        $: () => 'foo',
+      })).to.throw(Error);
+    });
+
+    it('$ is available as a dependency', () => {
+      expect(builder({
+        foo: $ => $(bar => bar),
+        bar: () => 'bar',
+      }).construct().getFoo()).to.equal('bar');
+    });
+
+    it('$ ran resolve new deps', () => {
+      const b = builder({
+        foo: $ => $(bar => bar),
+      });
+      const f = b.construct();
+      b.define({
+        bar: 'bar',
+      });
+      expect(f.foo).to.equal('bar');
+    });
+  });
+
+  describe('extending', () => {
+    it('can define new deps', () => {
+      const b = builder({
+        foo: 'foo',
+      });
+      const f = b.construct();
+      b.define({
+        bar: foo => foo,
+      });
+      expect(f.$(bar => bar)).to.equal('foo');
+    });
+  });
+
   describe('multiple services', () => {
     let f, d;
 
