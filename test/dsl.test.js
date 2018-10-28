@@ -212,6 +212,60 @@ describe('builder test suite', () => {
     });
   });
 
+  describe('multiple services as $Inject', function () {
+    let f,d;
+
+    beforeEach(function () {
+      const breakfast = function breakfast(meat, egg, juice) {
+        return meat + ' ' + egg + ' eggs ' + juice + ' juice';
+      };
+      breakfast.$Inject = [ 'meat', 'egg', 'juice' ];
+      const solids = function solids(meat, egg) {
+        return meat + ' ' + egg;
+      };
+      solids.$Inject = ['meat', 'egg' ];
+      f = builder({
+        breakfast,
+        solids,
+      });
+      d = f.construct();
+    });
+
+    it('exposing services', function () {
+      var builder = d.withMeat();
+      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
+      builder = builder.withEgg();
+      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
+      builder = builder.withJuice();
+      expect(builder).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
+    });
+
+    it('inject deps', function () {
+      d = f.construct({
+        meat: 'ham',
+        egg: 'scrambled',
+        juice: 'orange'
+      });
+      expect(d).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
+      expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
+    });
+
+    it('$ ran resolve new deps', () => {
+      const barProvider = bar => bar;
+      barProvider.$Inject = ['bar'];
+      const foo = $ => $(barProvider);
+      foo.$Inject = ['$']
+      const b = builder({
+        foo,
+      });
+      const f = b.construct();
+      b.define({
+        bar: 'bar',
+      });
+      expect(f.foo).to.equal('bar');
+    });
+  });
+
   describe('multiple services as array', function () {
     let f,d;
 
@@ -244,6 +298,17 @@ describe('builder test suite', () => {
       });
       expect(d).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
       expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
+    });
+
+    it('$ ran resolve new deps', () => {
+      const b = builder({
+        foo: ['$', $ => $(['bar', bar => bar])],
+      });
+      const f = b.construct();
+      b.define({
+        bar: 'bar',
+      });
+      expect(f.foo).to.equal('bar');
     });
   });
 
