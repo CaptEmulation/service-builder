@@ -212,18 +212,18 @@ describe('builder test suite', () => {
     });
   });
 
-  describe('multiple services as $Inject', function () {
+  describe('multiple services as $inject', function () {
     let f,d;
 
     beforeEach(function () {
       const breakfast = function breakfast(meat, egg, juice) {
         return meat + ' ' + egg + ' eggs ' + juice + ' juice';
       };
-      breakfast.$Inject = [ 'meat', 'egg', 'juice' ];
+      breakfast.$inject = [ 'meat', 'egg', 'juice' ];
       const solids = function solids(meat, egg) {
         return meat + ' ' + egg;
       };
-      solids.$Inject = ['meat', 'egg' ];
+      solids.$inject = ['meat', 'egg' ];
       f = builder({
         breakfast,
         solids,
@@ -252,9 +252,9 @@ describe('builder test suite', () => {
 
     it('$ ran resolve new deps', () => {
       const barProvider = bar => bar;
-      barProvider.$Inject = ['bar'];
+      barProvider.$inject = ['bar'];
       const foo = $ => $(barProvider);
-      foo.$Inject = ['$']
+      foo.$inject = ['$']
       const b = builder({
         foo,
       });
