@@ -184,17 +184,23 @@ console.log(await anotherFactory.getBreakfast());
 
 # Surviving Uglification
 
-Minification / uglifying code mangles variable names which breaks being able to resolve dependencies from function names.  The fix is the same as Angular, to use array style dependencies.  The example above can be written as follows in order to survive minifcation.
+Minification / uglifying code mangles variable names which breaks being able to resolve dependencies from function names.  The fix is the same as Angular 1.x, to use array style dependencies.  service-builder also supports annotate-ng style tags and is compatible with `ng-annotate` and `babel-plugin-angularjs-annotate`
 
 ```
 import builder from 'service-builder;
 
 const blueprint = builder({
+  // Array style
   breakfast: ['meat', 'eggs', 'drink', function (meat, eggs, drink) {
     return `${meat} with ${eggs} and ${drink}`;
   }],
-  eggs: ['eggStyle', eggStyle => `${eggStyle} eggs`],
-  solids: ['meat', 'egg', (meat, eggs) => [meat, eggs].join(', ')]
+  // Directive tyle
+  eggs: eggStyle => {
+    "ngInject";
+    return `${eggStyle} eggs`
+  },
+  // Wrapper function style
+  solids: ng((meat, eggs) => [meat, eggs].join(', ')),
 });
 
 const factory = blueprint.construct();
