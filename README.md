@@ -98,7 +98,7 @@ console.log($((meat, eggs) => `${eggs} and ${meat}`));
 // => 'fried eggs and rare steak'
 ```
 
-# Async
+# Promises
 
 If any dependencies return a promise, then the promise will be resolved before being used as dependency.  A side effect of this behavior is that any service that depends on a promise will also return a promise.
 
@@ -140,6 +140,46 @@ anotherFactory.getBreakfast()
   .then(console.log);
 // => Error
 
+```
+
+# Async
+
+Promise providers work will with async / await
+
+```
+import builder from 'service-builder;
+
+const blueprint = builder({
+  breakfast: function (meat, eggs, drink) {
+    return `${meat} with ${eggs} and ${drink}`;
+  },
+  // Get eggs async
+  eggs: async eggStyle => await asyncOperation(`${eggStyle} eggs`),
+  solids: (meat, eggs) => [meat, eggs].join(', ')
+});
+
+const factory = blueprint.construct();
+
+factory
+  .withMeat('ham')
+  .withEggStyle('scrambled')
+  .withDrink('orange juice')
+  .getBreakfast()
+  .then(console.log);
+// => 'ham with scrambled eggs and orange juice'
+
+const anotherFactory = blueprint.construct()
+  .withMeat('ham')
+  .withEggStyle('scrambled');
+
+console.log(await anotherFactory.getSolids());
+// => 'ham, scrambled eggs'
+
+console.log(await anotherFactory.getEggs());
+// => 'scrambled eggs'
+
+console.log(await anotherFactory.getBreakfast());
+// => Error
 ```
 
 # Surviving Uglification
