@@ -121,7 +121,7 @@ factory
   .withEggStyle('scrambled')
   .withDrink('orange juice')
   .getBreakfast()
-  .then(console.log);
+  .then(console.log.bind(console));
 // => 'ham with scrambled eggs and orange juice'
 
 const anotherFactory = blueprint.construct()
@@ -129,15 +129,15 @@ const anotherFactory = blueprint.construct()
   .withEggStyle('scrambled');
 
 anotherFactory.getSolids()
-  .then(console.log);
+  .then(console.log.bind(console));
 // => 'ham, scrambled eggs'
 
 anotherFactory.getEggs()
-  .then(console.log);
+  .then(console.log.bind(console));
 // => 'scrambled eggs'
 
 anotherFactory.getBreakfast()
-  .then(console.log);
+  .then(console.log.bind(console));
 // => Error
 
 ```
@@ -160,12 +160,11 @@ const blueprint = builder({
 
 const factory = blueprint.construct();
 
-factory
+console.log(await factory
   .withMeat('ham')
   .withEggStyle('scrambled')
   .withDrink('orange juice')
-  .getBreakfast()
-  .then(console.log);
+  .getBreakfast());
 // => 'ham with scrambled eggs and orange juice'
 
 const anotherFactory = blueprint.construct()
