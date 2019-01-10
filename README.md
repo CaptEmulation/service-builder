@@ -193,7 +193,7 @@ const blueprint = builder({
   breakfast: ['meat', 'eggs', 'drink', function (meat, eggs, drink) {
     return `${meat} with ${eggs} and ${drink}`;
   }],
-  // Directive tyle
+  // Directive style
   eggs: eggStyle => {
     "ngInject";
     return `${eggStyle} eggs`
