@@ -144,7 +144,7 @@ anotherFactory.getBreakfast()
 
 # Async
 
-Promise providers work will with async / await
+Promise providers work well with async / await
 
 ```
 import builder from 'service-builder;
