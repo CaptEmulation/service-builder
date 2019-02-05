@@ -1,4 +1,4 @@
-
+[![npm version](https://badge.fury.io/js/service-builder.svg)](https://badge.fury.io/js/service-builder) [![Build Status](https://travis-ci.org/CaptEmulation/service-builder.svg?branch=master)](https://travis-ci.org/CaptEmulation/service-builder)
 
 # Introduction
 
