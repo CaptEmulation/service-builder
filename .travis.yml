@@ -3,6 +3,8 @@ node_js:
   - 6
   - 8
   - 10
+before_script:
+  - npm run lint
 notifications:
   email:
     - jdean@shutterstock.com
