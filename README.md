@@ -1,3 +1,5 @@
+
+
 # Introduction
 
 `service-builder` is a dependency injection and service factory framework.
@@ -225,3 +227,7 @@ anotherFactory.getEggs();
 anotherFactory.getBreakfast();
 // => Error unable to resolve drink at breakfast
 ```
+
+# License
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)

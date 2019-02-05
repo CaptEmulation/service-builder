@@ -1,21 +1,22 @@
-'use strict';
-
 const chai = require('chai');
 const builder = require('../lib');
-const expect = chai.expect;
+
+const { expect } = chai;
 
 chai.use(require('chai-as-promised'));
+
 chai.config.includeStack = true;
 
 describe('builder test suite', () => {
   describe('the shape of a builder', () => {
-    let f, d;
+    let f; let
+      d;
 
     beforeEach(() => {
       f = builder({
-        breakfast: function (meat, egg, juice) {
+        breakfast(meat, egg, juice) {
           return `${meat} ${egg} eggs ${juice} juice`;
-        }
+        },
       });
       d = f.construct();
     });
@@ -26,7 +27,7 @@ describe('builder test suite', () => {
 
     it('is a function', () => {
       expect(d.withMeat).to.be.a('function');
-    })
+    });
 
     it('builder makes more builder', () => {
       expect(d.withMeat()).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'breakfast');
@@ -44,11 +45,12 @@ describe('builder test suite', () => {
   });
 
   describe('no dep services', () => {
-    let f, d;
+    let f; let
+      d;
 
     beforeEach(() => {
       f = builder({
-        foo: () => 'bar'
+        foo: () => 'bar',
       });
       d = f.construct();
     });
@@ -110,7 +112,7 @@ describe('builder test suite', () => {
       });
       expect(b.construct()(foo => foo)).to.equal('bar');
     });
-  })
+  });
 
   describe('extending', () => {
     it('can define new deps', () => {
@@ -126,32 +128,33 @@ describe('builder test suite', () => {
   });
 
   describe('multiple services', () => {
-    let f, d;
+    let f;
+    let d;
 
     beforeEach(() => {
       f = builder({
-        breakfast: function (meat, egg, juice) {
+        breakfast(meat, egg, juice) {
           return `${meat} ${egg} eggs ${juice} juice`;
         },
-        solids: (meat, egg) => `${meat} ${egg}`
+        solids: (meat, egg) => `${meat} ${egg}`,
       });
       d = f.construct();
     });
 
     it('exposing services', () => {
-      let builder = d.withMeat();
-      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
-      builder = builder.withEgg();
-      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
-      builder = builder.withJuice();
-      expect(builder).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
+      let b = d.withMeat();
+      expect(b).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
+      b = b.withEgg();
+      expect(b).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
+      b = b.withJuice();
+      expect(b).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
     });
 
     it('inject deps', () => {
       d = f.construct({
         meat: 'ham',
         egg: 'scrambled',
-        juice: 'orange'
+        juice: 'orange',
       });
       expect(d).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
       expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
@@ -161,16 +164,16 @@ describe('builder test suite', () => {
       d = f.construct({
         meat: 'ham',
         egg: 'scrambled',
-        juice: 'orange'
+        juice: 'orange',
       });
       expect(d.$(breakfast => breakfast)).to.equal('ham scrambled eggs orange juice');
     });
   });
 
-  describe('bling', function () {
+  describe('bling', () => {
     it('obtain deps', () => {
       const f = builder({
-        breakfast: function (meat, egg, juice) {
+        breakfast(meat, egg, juice) {
           return `${meat} ${egg} eggs ${juice} juice`;
         },
       }).construct({
@@ -212,18 +215,18 @@ describe('builder test suite', () => {
     });
   });
 
-  describe('multiple services as $inject', function () {
-    let f,d;
+  describe('multiple services as $inject', () => {
+    let f; let d;
 
-    beforeEach(function () {
+    beforeEach(() => {
       const breakfast = function breakfast(meat, egg, juice) {
-        return meat + ' ' + egg + ' eggs ' + juice + ' juice';
+        return `${meat} ${egg} eggs ${juice} juice`;
       };
-      breakfast.$inject = [ 'meat', 'egg', 'juice' ];
+      breakfast.$inject = ['meat', 'egg', 'juice'];
       const solids = function solids(meat, egg) {
-        return meat + ' ' + egg;
+        return `${meat} ${egg}`;
       };
-      solids.$inject = ['meat', 'egg' ];
+      solids.$inject = ['meat', 'egg'];
       f = builder({
         breakfast,
         solids,
@@ -231,20 +234,20 @@ describe('builder test suite', () => {
       d = f.construct();
     });
 
-    it('exposing services', function () {
-      var builder = d.withMeat();
-      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
-      builder = builder.withEgg();
-      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
-      builder = builder.withJuice();
-      expect(builder).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
+    it('exposing services', () => {
+      let b = d.withMeat();
+      expect(b).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
+      b = b.withEgg();
+      expect(b).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
+      b = b.withJuice();
+      expect(b).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
     });
 
-    it('inject deps', function () {
+    it('inject deps', () => {
       d = f.construct({
         meat: 'ham',
         egg: 'scrambled',
-        juice: 'orange'
+        juice: 'orange',
       });
       expect(d).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
       expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
@@ -254,47 +257,47 @@ describe('builder test suite', () => {
       const barProvider = bar => bar;
       barProvider.$inject = ['bar'];
       const foo = $ => $(barProvider);
-      foo.$inject = ['$']
+      foo.$inject = ['$'];
       const b = builder({
         foo,
       });
-      const f = b.construct();
+      const g = b.construct();
       b.define({
         bar: 'bar',
       });
-      expect(f.foo).to.equal('bar');
+      expect(g.foo).to.equal('bar');
     });
   });
 
-  describe('multiple services as array', function () {
-    let f,d;
+  describe('multiple services as array', () => {
+    let f; let d;
 
-    beforeEach(function () {
+    beforeEach(() => {
       f = builder({
-        breakfast: [ 'meat', 'egg', 'juice', function breakfast(meat, egg, juice) {
-          return meat + ' ' + egg + ' eggs ' + juice + ' juice';
+        breakfast: ['meat', 'egg', 'juice', function breakfast(meat, egg, juice) {
+          return `${meat} ${egg} eggs ${juice} juice`;
         }],
         solids: ['meat', 'egg', function solids(meat, egg) {
-          return meat + ' ' + egg;
-        }]
+          return `${meat} ${egg}`;
+        }],
       });
       d = f.construct();
     });
 
-    it('exposing services', function () {
-      var builder = d.withMeat();
-      expect(builder).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
-      builder = builder.withEgg();
-      expect(builder).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
-      builder = builder.withJuice();
-      expect(builder).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
+    it('exposing services', () => {
+      let b = d.withMeat();
+      expect(b).to.have.keys('withEgg', 'withJuice', 'getBreakfast', 'getSolids', 'breakfast', 'solids');
+      b = b.withEgg();
+      expect(b).to.have.keys('getSolids', 'withJuice', 'getBreakfast', 'breakfast', 'solids');
+      b = b.withJuice();
+      expect(b).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
     });
 
-    it('inject deps', function () {
+    it('inject deps', () => {
       d = f.construct({
         meat: 'ham',
         egg: 'scrambled',
-        juice: 'orange'
+        juice: 'orange',
       });
       expect(d).to.have.keys('getBreakfast', 'getSolids', 'breakfast', 'solids');
       expect(d.getBreakfast()).to.equal('ham scrambled eggs orange juice');
@@ -304,11 +307,11 @@ describe('builder test suite', () => {
       const b = builder({
         foo: ['$', $ => $(['bar', bar => bar])],
       });
-      const f = b.construct();
+      const g = b.construct();
       b.define({
         bar: 'bar',
       });
-      expect(f.foo).to.equal('bar');
+      expect(g.foo).to.equal('bar');
     });
   });
 
@@ -319,7 +322,7 @@ describe('builder test suite', () => {
       d = builder({
         meal: (meat, veggie) => `${meat} and ${veggie}`,
         meat: (meatStyle, meatCut) => `${meatStyle} ${meatCut}`,
-        veggie: (veggieStyle, vegatable) => `${veggieStyle} ${vegatable}`
+        veggie: (veggieStyle, vegatable) => `${veggieStyle} ${vegatable}`,
       }).construct();
     });
 
@@ -338,8 +341,8 @@ describe('builder test suite', () => {
       const d = builder({
         meal: (meat, veggie) => Promise.resolve(`${meat} and ${veggie}`),
         meat: (meatStyle, meatCut) => Promise.resolve(`${meatStyle} ${meatCut}`),
-        veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`)
-      }).construct()
+        veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`),
+      }).construct();
       return expect(d.withVeggieStyle('steamed')
         .withVegatable('beans')
         .withMeatCut('steak')
@@ -352,8 +355,8 @@ describe('builder test suite', () => {
       const d = builder({
         meal: (meat, veggie) => `${meat} and ${veggie}`,
         meat: (meatStyle, meatCut) => Promise.resolve(`${meatStyle} ${meatCut}`),
-        veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`)
-      }).construct()
+        veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`),
+      }).construct();
       return expect(d.withVeggieStyle('steamed')
         .withVegatable('beans')
         .withMeatCut('steak')
@@ -370,7 +373,7 @@ describe('builder test suite', () => {
       d = builder({
         a: b => b,
         b: c => c,
-        c: a => a
+        c: a => a,
       }).construct();
     });
 
