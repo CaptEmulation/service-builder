@@ -18,7 +18,7 @@ describe('builder test suite', () => {
           return `${meat} ${egg} eggs ${juice} juice`;
         },
       });
-      d = f.construct();
+      d = f.dsl();
     });
 
     it('make a builder', () => {
@@ -52,7 +52,7 @@ describe('builder test suite', () => {
       f = builder({
         foo: () => 'bar',
       });
-      d = f.construct();
+      d = f.dsl();
     });
 
     it('exists', () => {
@@ -71,14 +71,14 @@ describe('builder test suite', () => {
       expect(builder({
         foo: $ => $(bar => bar),
         bar: () => 'bar',
-      }).construct().getFoo()).to.equal('bar');
+      }).dsl().getFoo()).to.equal('bar');
     });
 
     it('$ ran resolve new deps', () => {
       const b = builder({
         foo: $ => $(bar => bar),
       });
-      const f = b.construct();
+      const f = b.dsl();
       b.define({
         bar: 'bar',
       });
@@ -87,22 +87,11 @@ describe('builder test suite', () => {
   });
 
   describe('no dsl', () => {
-    before(() => {
-      builder.config({
-        dsl: false,
-      });
-    });
-    after(() => {
-      builder.config({
-        dsl: true,
-      });
-    });
-
     it('Returns a resolver', () => {
       const b = builder({
         foo: 'foo',
       });
-      expect(b.construct()(foo => foo)).to.equal('foo');
+      expect(b.factory()(foo => foo)).to.equal('foo');
     });
 
     it('can still use a resolver', () => {
@@ -110,7 +99,7 @@ describe('builder test suite', () => {
         foo: $ => $(bar => bar),
         bar: () => 'bar',
       });
-      expect(b.construct()(foo => foo)).to.equal('bar');
+      expect(b.factory()(foo => foo)).to.equal('bar');
     });
   });
 
@@ -119,7 +108,7 @@ describe('builder test suite', () => {
       const b = builder({
         foo: 'foo',
       });
-      const f = b.construct();
+      const f = b.dsl();
       b.define({
         bar: foo => foo,
       });
@@ -138,7 +127,7 @@ describe('builder test suite', () => {
         },
         solids: (meat, egg) => `${meat} ${egg}`,
       });
-      d = f.construct();
+      d = f.dsl();
     });
 
     it('exposing services', () => {
@@ -151,7 +140,7 @@ describe('builder test suite', () => {
     });
 
     it('inject deps', () => {
-      d = f.construct({
+      d = f.dsl({
         meat: 'ham',
         egg: 'scrambled',
         juice: 'orange',
@@ -161,7 +150,7 @@ describe('builder test suite', () => {
     });
 
     it('obtain deps', () => {
-      d = f.construct({
+      d = f.dsl({
         meat: 'ham',
         egg: 'scrambled',
         juice: 'orange',
@@ -176,7 +165,7 @@ describe('builder test suite', () => {
         breakfast(meat, egg, juice) {
           return `${meat} ${egg} eggs ${juice} juice`;
         },
-      }).construct({
+      }).dsl({
         meat: 'ham',
         egg: 'scrambled',
         juice: 'orange',
@@ -185,33 +174,33 @@ describe('builder test suite', () => {
     });
 
     it('obtain construct instance', () => {
-      const f = builder().construct({
+      const f = builder().dsl({
         meat: 'ham',
       });
       expect(f.$(meat => meat)).to.equal('ham');
     });
 
     it('multiple deps', () => {
-      const f = builder().construct({
+      const f = builder().factory({
         meat: 'ham',
         egg: 'scrambled',
         juice: 'orange',
       });
-      expect(f.$((meat, egg, juice) => meat + egg + juice)).to.equal('hamscrambledorange');
+      expect(f((meat, egg, juice) => meat + egg + juice)).to.equal('hamscrambledorange');
     });
 
     it('async', () => {
-      const f = builder().construct({
+      const f = builder().factory({
         meat: Promise.resolve('ham'),
       });
-      return expect(f.$(meat => meat)).to.eventually.equal('ham');
+      return expect(f(meat => meat)).to.eventually.equal('ham');
     });
 
     it('async failure', () => {
-      const f = builder().construct({
+      const f = builder().factory({
         meat: Promise.reject(new Error('ham')),
       });
-      return expect(f.$(meat => meat)).to.rejectedWith(Error);
+      return expect(f(meat => meat)).to.rejectedWith(Error);
     });
   });
 
@@ -231,7 +220,7 @@ describe('builder test suite', () => {
         breakfast,
         solids,
       });
-      d = f.construct();
+      d = f.dsl();
     });
 
     it('exposing services', () => {
@@ -244,7 +233,7 @@ describe('builder test suite', () => {
     });
 
     it('inject deps', () => {
-      d = f.construct({
+      d = f.dsl({
         meat: 'ham',
         egg: 'scrambled',
         juice: 'orange',
@@ -261,7 +250,7 @@ describe('builder test suite', () => {
       const b = builder({
         foo,
       });
-      const g = b.construct();
+      const g = b.dsl();
       b.define({
         bar: 'bar',
       });
@@ -281,7 +270,7 @@ describe('builder test suite', () => {
           return `${meat} ${egg}`;
         }],
       });
-      d = f.construct();
+      d = f.dsl();
     });
 
     it('exposing services', () => {
@@ -294,7 +283,7 @@ describe('builder test suite', () => {
     });
 
     it('inject deps', () => {
-      d = f.construct({
+      d = f.dsl({
         meat: 'ham',
         egg: 'scrambled',
         juice: 'orange',
@@ -307,7 +296,7 @@ describe('builder test suite', () => {
       const b = builder({
         foo: ['$', $ => $(['bar', bar => bar])],
       });
-      const g = b.construct();
+      const g = b.dsl();
       b.define({
         bar: 'bar',
       });
@@ -323,7 +312,7 @@ describe('builder test suite', () => {
         meal: (meat, veggie) => `${meat} and ${veggie}`,
         meat: (meatStyle, meatCut) => `${meatStyle} ${meatCut}`,
         veggie: (veggieStyle, vegatable) => `${veggieStyle} ${vegatable}`,
-      }).construct();
+      }).dsl();
     });
 
     it('loads a dependency', () => {
@@ -342,7 +331,7 @@ describe('builder test suite', () => {
         meal: (meat, veggie) => Promise.resolve(`${meat} and ${veggie}`),
         meat: (meatStyle, meatCut) => Promise.resolve(`${meatStyle} ${meatCut}`),
         veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`),
-      }).construct();
+      }).dsl();
       return expect(d.withVeggieStyle('steamed')
         .withVegatable('beans')
         .withMeatCut('steak')
@@ -356,7 +345,7 @@ describe('builder test suite', () => {
         meal: (meat, veggie) => `${meat} and ${veggie}`,
         meat: (meatStyle, meatCut) => Promise.resolve(`${meatStyle} ${meatCut}`),
         veggie: (veggieStyle, vegatable) => Promise.resolve(`${veggieStyle} ${vegatable}`),
-      }).construct();
+      }).dsl();
       return expect(d.withVeggieStyle('steamed')
         .withVegatable('beans')
         .withMeatCut('steak')
@@ -374,7 +363,7 @@ describe('builder test suite', () => {
         a: b => b,
         b: c => c,
         c: a => a,
-      }).construct();
+      }).dsl();
     });
 
     it('with error message', () => {

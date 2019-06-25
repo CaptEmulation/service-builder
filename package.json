@@ -13,18 +13,21 @@
   "author": "John Dean <john.holmes.dean@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "@captemulation/get-parameter-names": "^1.0.0",
-    "lodash": "^4.13.1"
+    "@captemulation/get-parameter-names": "^1.3.0",
+    "lodash.difference": "^4.5.0",
+    "lodash.union": "^4.6.0"
   },
   "devDependencies": {
-    "babel-cli": "^6.24.0",
-    "babel-preset-env": "^1.6.0",
-    "babel-register": "^6.14.0",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/preset-env": "^7.4.5",
+    "@babel/register": "^7.4.4",
     "chai": "^3.5.0",
     "chai-as-promised": "^5.3.0",
-    "eslint": "^5.13.0",
+    "eslint": "^5.3.0",
     "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.16.0",
+    "eslint-plugin-import": "^2.18.0",
+    "eslint-plugin-react": "^7.14.2",
     "mocha": "^5.2.0"
   }
 }

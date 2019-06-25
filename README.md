@@ -2,7 +2,139 @@
 
 # Introduction
 
-`service-builder` is a dependency injection and service factory framework.
+`service-builder` is a dependency injection framework that helps developers write factories that satsify the principle of lest privilege.  The target audience for this library are those that like having factories but not necessarily writing them.  
+
+# Example
+
+Let's assume we are building a car module.  The initial approach might be to create an object that has implicit dependencies:
+
+```
+function createCar() {
+  const engine = createEngine();
+  const wheels = createWheels();
+  return {
+    start() {
+      engine.start();
+    },
+    drive() {
+      if (engine.isRunning) {
+        wheels.rotate();
+      }
+    }
+  }
+}
+```
+ - [ ] Supports dependency injection
+ - [x] Supports principle of least privilege
+
+This initial version is great because calling `createCar` is all that is needed to make a car.  Nothing more is needed to be known about how a car works.  However, the car that is being create is not very flexible.  Only one type of car can exist.
+
+Later developers learn that engines can have a variable number of cylinders and wheels can have different friction coefficients.  To support these the `createCar` factory is modified:
+
+```
+function createCar(engineCylinders, wheelFriction) {
+  const engine = createEngine(engineCylinders);
+  const wheels = createWheels(wheelFriction);
+  return {
+    start() {
+      engine.start();
+    },
+    drive() {
+      if (engine.isRunning) {
+        wheels.rotate();
+      }
+    }
+  }
+}
+```
+
+- [ ] Supports dependency injection
+- [ ] Supports principle of least privilege
+
+Uh-oh... Now the `createCar` class is becoming very tightly coupled to its dependencies.  Furthermore, any changes to `createEngine` or `createWheels` now requires changes to `createCar` *and any code that is dependent on Car*.  We still don't support dependency injection, but also now `createCar` needs to know more about `createEngine` and `createWheels`.
+
+For reasons of dependency injection, passing in dependencies as arguments helps write code that supports dependency injection.
+
+```
+function createCar(engine, wheels) {
+  return {
+    start() {
+      engine.start();
+    },
+    drive() {
+      if (engine.isRunning) {
+        wheels.rotate();
+      }
+    }
+  }
+}
+```
+
+- [x] Supports dependency injection
+- [ ] Supports principle of least privilege
+
+Great!  Now `createCar` doesn't care where `engine` and `wheels` came from.  However, the problem of least privilege has only been moved around.  Now, in order to make a car instance, clients need to also make an `engine` and `wheels`.  Our code for instantiating a car has gone from:
+
+```
+const car = createCar();
+```
+to
+```
+const car = createCar(6, 0.2);
+```
+to
+```
+const car = createCar(createEngine(6), createWheels(0.2));
+```
+
+Now imagine that `createEngine` and `createWheels` end up needing additional dependencies.  Before long, in order to use `createCar`, the developer will need to first create the rubber and metal when all we wanted to do was make it go!
+
+
+`service-builder` can create a factory for building cars.
+
+```
+import builder from 'service-builder;
+
+const carBlueprint = builder({
+  car(engine, wheels): createCar,
+  engine(cylinders): createEngine,
+  wheels(friction): createWheels,
+});
+
+const sportsCarFactory = carBlueprint.construct({
+  cylinders: 8,
+  friction: 0.9,
+});
+
+// Make a sports car:
+const sportsCar = sportsCarFactory.getCar();
+```
+
+`service-builder` will automatically create, walk and fill the dependency tree in order to create a instances.  Users of the factory do not need to car how instances are built.
+
+
+Now that we have a blueprint, we can create new factories with different dependencies:
+
+```
+const sedanFactory = blueprint.construct({
+  cylinders: 4,
+  friction: 0.6,
+});
+
+// Make a sedan
+const sedan = sedanFactory.getCar();
+```
+
+Or even with entirely new types:
+
+```
+const rocketCarFactory = blueprint.construct({
+  engine: createJetEngine,
+  wheels: createRetractableWheels,
+});
+
+const rocketCar = rocketCarFactory.getCar();
+```
 
 # Usage
 
