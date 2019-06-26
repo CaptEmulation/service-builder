@@ -8,5 +8,6 @@ before_script:
 deploy:
   provider: npm
   api_key: $SSTK_NPM_TOKEN
+  email: tech.activation.team@shutterstock.com
   on:
     tags: true
