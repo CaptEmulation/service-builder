@@ -1,6 +1,6 @@
 {
   "name": "shutterstock-mold",
-  "version": "1.0.0-prerelease.4",
+  "version": "1.0.0-prerelease.5",
   "description": "Easy dependency injection",
   "repository": "https://github.com/shutterstock/mold",
   "main": "dist/index.js",
