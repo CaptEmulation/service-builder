@@ -1,11 +1,8 @@
 {
-  "name": "@shutterstock/mold",
-  "version": "1.0.0-prerelease.2",
+  "name": "shutterstock-mold",
+  "version": "1.0.0-prerelease.3",
   "description": "Easy dependency injection",
   "repository": "https://github.com/shutterstock/mold",
-  "publishConfig": {
-    "access": "public"
-  },
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha",

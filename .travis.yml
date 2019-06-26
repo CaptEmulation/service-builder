@@ -3,11 +3,24 @@ node_js:
   - 8
   - 10
   - 12
-before_script:
-  - npm run lint
-deploy:
-  provider: npm
-  api_key: $SSTK_NPM_TOKEN
-  email: tech.activation.team@shutterstock.com
-  on:
-    tags: true
+
+script: echo "Running against $(node -v) ..."
+
+jobs:
+  include:
+    - stage: test
+      script: npm run lint
+      on:
+        all_branches: true
+    - script: npm run test
+      on:
+        all_branches: true
+    - stage: npm release
+      node_js: "12"
+      script: echo "Deploying to npm ..."
+      deploy:
+        provider: npm
+        api_key: $SSTK_NPM_TOKEN
+        email: tech.activation.team@shutterstock.com
+        on:
+          tags: true
