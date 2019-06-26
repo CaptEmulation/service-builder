@@ -2,7 +2,7 @@
 
 # Introduction
 
-`service-builder` is a dependency injection framework that helps developers write factories that satsify the principle of lest privilege.  The target audience for this library are those that like having factories but not necessarily writing them.  
+`service-builder` is a dependency injection framework that helps developers write factories that satisfy the principle of least privilege for functional arguments. The target audience for this library are those that like having factories but not necessarily writing them. In addition, this library makes writing unit tests with mocked dependencies a breeze.  
 
 # Example
 
@@ -87,13 +87,12 @@ to
 const car = createCar(createEngine(6), createWheels(0.2));
 ```
 
-Now imagine that `createEngine` and `createWheels` end up needing additional dependencies.  Before long, in order to use `createCar`, the developer will need to first create the rubber and metal when all we wanted to do was make it go!
-
+Now imagine that `createEngine` and `createWheels` end up needing additional dependencies.  Before long, in order to use `createCar`, the developer will need to first create the rubber, the metal, the wood panelling and then tighten every screw.
 
 `service-builder` can create a factory for building cars.
 
 ```
-import builder from 'service-builder;
+import builder from 'service-builder';
 
 const carBlueprint = builder({
   car(engine, wheels): createCar,
@@ -101,12 +100,12 @@ const carBlueprint = builder({
   wheels(friction): createWheels,
 });
 
-const sportsCarFactory = carBlueprint.construct({
+const sportsCarFactory = carBlueprint.dsl({
   cylinders: 8,
   friction: 0.9,
 });
 
-// Make a sports car:
+// Now anyone can make a sports car:
 const sportsCar = sportsCarFactory.getCar();
 ```
 
@@ -116,7 +115,7 @@ const sportsCar = sportsCarFactory.getCar();
 Now that we have a blueprint, we can create new factories with different dependencies:
 
 ```
-const sedanFactory = blueprint.construct({
+const sedanFactory = blueprint.dsl({
   cylinders: 4,
   friction: 0.6,
 });
@@ -128,7 +127,7 @@ const sedan = sedanFactory.getCar();
 Or even with entirely new types:
 
 ```
-const rocketCarFactory = blueprint.construct({
+const rocketCarFactory = blueprint.dsl({
   engine: createJetEngine,
   wheels: createRetractableWheels,
 });
@@ -136,10 +135,75 @@ const rocketCarFactory = blueprint.construct({
 const rocketCar = rocketCarFactory.getCar();
 ```
 
-# Usage
+With the factory DSL, dependencies do not need to be provided initially.
 
 ```
-import builder from 'service-builder;
+const enginelessCarFactory = builder({
+  car(engine, wheels): createCar,
+  wheels(friction): createWheels,
+}).dsl({
+  friction: 0.9,
+});
+
+enginelessCarFactory.getCar(); // Error: Failed to resolve engine from wheels,friction at car
+
+enginelessCarFactory
+  .withEngine(engine)
+  .getCar(); // Success
+```
+
+# Functional Factories
+
+Instead of the DSL syntax, a functional factory can be created.
+
+```
+const carBlueprint = builder({
+  car(engine, wheels): createCar,
+  engine(cylinders): createEngine,
+  wheels(friction): createWheels,
+});
+
+const racingCarFactory = carBlueprint.factory({
+  cylinders: 12,
+  friction: 0.95,
+});
+
+racingCarFactory(car => {
+  // Do something with car
+});
+```
+
+The function passed into the factory will have dependencies matching the name of the arguments injected into the function when it is called.
+
+# Dependency Injection
+
+Creating a factory is always a two-step process.  The examples here go from builder => blueprint => factory.  Blueprint dependencies can be replaced at any time or overloaded when creating the final factory.  This is most useful for test.
+
+```
+const carBlueprint = builder({
+  car(engine, wheels): createCar,
+  engine(cylinders): createEngine,
+  wheels(friction): createWheels,
+});
+
+// Create factory with mock wheels
+const mockWheels = { rotate: mockFunc };
+const testCarFactory = carBlueprint.dsl({
+  cylinders: 0,
+  // Since we are injecting the wheels, friction is no longer required
+  wheels: mockWheels,
+});
+
+const testCar = testCarFactory.getCar();
+testCar.start();
+testCar.drive();
+expect(mockWheels.rotate).toHaveBeenCalled();
+```
+
+# Additional Usage
+
+```
+import builder from 'service-builder'
 
 const blueprint = builder({
   breakfast: function (meat, eggs, drink) {
@@ -149,7 +213,7 @@ const blueprint = builder({
   solids: (meat, eggs) => [meat, eggs].join(', ')
 });
 
-const factory = blueprint.construct();
+const factory = blueprint.dsl();
 
 factory
   .withMeat('ham')
@@ -158,7 +222,7 @@ factory
   .getBreakfast();
 // => 'ham with scrambled eggs and orange juice'
 
-const anotherFactory = blueprint.construct({
+const anotherFactory = blueprint.dsl({
   meat: 'sausage'
 })
   .withEggStyle('scrambled');
@@ -170,7 +234,7 @@ anotherFactory.getEggs();
 // => 'scrambled eggs'
 
 anotherFactory.getBreakfast();
-// => Error
+// => Error: Failed to resolve drink from meat,eggStyle,eggs at breakfast
 ```
 # Lazy properties
 Instead of using the getter functions, there are also lazily evaluated properties on the factory
@@ -179,7 +243,7 @@ Instead of using the getter functions, there are also lazily evaluated propertie
 const blueprint = builder({
   eggs: eggStyle => `${eggStyle} eggs`,
 });
-const factory = blueprint.construct({
+const factory = blueprint.dsl({
   eggStyle: 'fried',
 });
 console.log(factory.eggs);
@@ -194,7 +258,7 @@ const blueprint = builder({
   foo: bar => `foo${bar}`,
   bar: 'bar',  
 });
-const factory = blueprint.construct();
+const factory = blueprint.dsl();
 console.log(factory.foo);
 // => 'foobar'
 ```
@@ -208,7 +272,7 @@ const blueprint = builder({
   eggs: eggStyle => `${eggStyle} eggs`,
   meat: meatStyle => `${meatStyle} steak`,
 });
-const factory = blueprint.construct({
+const factory = blueprint.dsl({
   eggStyle: 'fried',
   meatStyle: 'rare',
 });
@@ -216,20 +280,27 @@ console.log(factory.$((meat, eggs) => `${eggs} and ${meat}`));
 // => 'fried eggs and rare steak'
 ```
 
-Alternatively, you can forgo the DSL syntax of the constructed factory entirely in favor of a resolver:
+Alternatively, you can forgo the DSL syntax in favor of a pure resolver.  A resolver will accept a function and will call the function with all dependencies resolved (or will throw an error):
 
 ```
-builder.config({ dsl: false });
 const blueprint = builder({
   eggs: eggStyle => `${eggStyle} eggs`,
   meat: meatStyle => `${meatStyle} steak`,
 });
-const $ = blueprint.construct({
+const $ = blueprint.factory({
   eggStyle: 'fried',
   meatStyle: 'rare',
 });
 console.log($((meat, eggs) => `${eggs} and ${meat}`));
 // => 'fried eggs and rare steak'
+
+// DSLs will also include a factory resolver named $
+
+const factory = blueprint.dsl({
+  eggStyle: 'fried',
+  meatStyle: 'rare',
+});
+console.log(factory.$((meat, eggs) => `${eggs} and ${meat}`));
 ```
 
 # Promises
@@ -237,7 +308,7 @@ console.log($((meat, eggs) => `${eggs} and ${meat}`));
 If any dependencies return a promise, then the promise will be resolved before being used as dependency.  A side effect of this behavior is that any service that depends on a promise will also return a promise.
 
 ```
-import builder from 'service-builder;
+import builder from 'service-builder'
 
 const blueprint = builder({
   breakfast: function (meat, eggs, drink) {
@@ -248,7 +319,7 @@ const blueprint = builder({
   solids: (meat, eggs) => [meat, eggs].join(', ')
 });
 
-const factory = blueprint.construct();
+const factory = blueprint.dsl();
 
 factory
   .withMeat('ham')
@@ -258,7 +329,7 @@ factory
   .then(console.log.bind(console));
 // => 'ham with scrambled eggs and orange juice'
 
-const anotherFactory = blueprint.construct()
+const anotherFactory = blueprint.dsl()
   .withMeat('ham')
   .withEggStyle('scrambled');
 
@@ -271,8 +342,8 @@ anotherFactory.getEggs()
 // => 'scrambled eggs'
 
 anotherFactory.getBreakfast()
-  .then(console.log.bind(console));
-// => Error
+  .then(console.log.bind(console), console.error.bind(console));
+// => Error: Failed to resolve drink from meat,eggStyle,eggs at breakfast
 
 ```
 
@@ -281,7 +352,7 @@ anotherFactory.getBreakfast()
 Promise providers work well with async / await
 
 ```
-import builder from 'service-builder;
+import builder from 'service-builder'
 
 const blueprint = builder({
   breakfast: function (meat, eggs, drink) {
@@ -292,7 +363,7 @@ const blueprint = builder({
   solids: (meat, eggs) => [meat, eggs].join(', ')
 });
 
-const factory = blueprint.construct();
+const factory = blueprint.dsl();
 
 console.log(await factory
   .withMeat('ham')
@@ -301,7 +372,7 @@ console.log(await factory
   .getBreakfast());
 // => 'ham with scrambled eggs and orange juice'
 
-const anotherFactory = blueprint.construct()
+const anotherFactory = blueprint.dsl()
   .withMeat('ham')
   .withEggStyle('scrambled');
 
@@ -312,7 +383,7 @@ console.log(await anotherFactory.getEggs());
 // => 'scrambled eggs'
 
 console.log(await anotherFactory.getBreakfast());
-// => Error
+// => Error: Failed to resolve drink from meat,eggStyle,eggs at breakfast
 ```
 
 # Surviving Uglification
@@ -320,7 +391,7 @@ console.log(await anotherFactory.getBreakfast());
 Minification / uglifying code mangles variable names which breaks being able to resolve dependencies from function names.  The fix is the same as Angular 1.x, to use array style dependencies.  service-builder also supports annotate-ng style tags and is compatible with `ng-annotate` and `babel-plugin-angularjs-annotate`
 
 ```
-import builder from 'service-builder;
+import builder from 'service-builder'
 
 const blueprint = builder({
   // Array style
@@ -336,7 +407,7 @@ const blueprint = builder({
   solids: ng((meat, eggs) => [meat, eggs].join(', ')),
 });
 
-const factory = blueprint.construct();
+const factory = blueprint.dsl();
 
 // Everything continues to work as before, except you can now safely uglify code
 factory
@@ -346,7 +417,7 @@ factory
   .getBreakfast();
 // => 'ham with scrambled eggs and orange juice'
 
-const anotherFactory = blueprint.construct()
+const anotherFactory = blueprint.dsl()
   .withMeat('steak')
   .withEggStyle('pouched');
 
@@ -357,7 +428,7 @@ anotherFactory.getEggs();
 // => 'puched eggs'
 
 anotherFactory.getBreakfast();
-// => Error unable to resolve drink at breakfast
+// => Error: Failed to resolve drink from meat,eggStyle,eggs at breakfast
 ```
 
 # License
