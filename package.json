@@ -1,8 +1,8 @@
 {
-  "name": "service-builder",
-  "version": "2.0.0",
-  "description": "Service builder DSL without the boilerplate",
-  "repository": "https://github.com/CaptEmulation/service-builder",
+  "name": "@shutterstock/mold",
+  "version": "1.0.0-prerelease.1",
+  "description": "Easy dependency injection",
+  "repository": "https://github.com/shutterstock/mold",
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha",
@@ -10,7 +10,7 @@
     "lint": "eslint lib test",
     "prepublishOnly": "npm run build"
   },
-  "author": "John Dean <john.holmes.dean@gmail.com>",
+  "author": "John Dean <jdean@shutterstock.com>",
   "license": "MIT",
   "dependencies": {
     "@captemulation/get-parameter-names": "^1.3.0",

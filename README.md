@@ -1,8 +1,8 @@
-[![npm version](https://badge.fury.io/js/service-builder.svg)](https://badge.fury.io/js/service-builder) [![Build Status](https://travis-ci.org/CaptEmulation/service-builder.svg?branch=master)](https://travis-ci.org/CaptEmulation/service-builder)
+[![npm version](https://badge.fury.io/js/@shutterstock/mold.svg)](https://badge.fury.io/js/@shutterstock/mold) [![Build Status](https://travis-ci.org/shutterstock/mold.svg?branch=master)](https://travis-ci.org/shutterstock/mold)
 
 # Introduction
 
-`service-builder` is a dependency injection framework that helps developers write factories that satisfy the principle of least privilege for functional arguments. The target audience for this library are those that like having factories but not necessarily writing them. In addition, this library makes writing unit tests with mocked dependencies a breeze.  
+`@shutterstock/mold` is a dependency injection framework that helps developers write factories that satisfy the principle of least privilege for functional arguments. The target audience for this library are those that like having factories but not necessarily writing them. In addition, this library makes writing unit tests with mocked dependencies a breeze.  
 
 # Example
 
@@ -89,10 +89,10 @@ const car = createCar(createEngine(6), createWheels(0.2));
 
 Now imagine that `createEngine` and `createWheels` end up needing additional dependencies.  Before long, in order to use `createCar`, the developer will need to first create the rubber, the metal, the wood panelling and then tighten every screw.
 
-`service-builder` can create a factory for building cars.
+`@shutterstock/mold` can create a factory for building cars.
 
 ```
-import builder from 'service-builder';
+import builder from '@shutterstock/mold';
 
 const carBlueprint = builder({
   car(engine, wheels): createCar,
@@ -109,7 +109,7 @@ const sportsCarFactory = carBlueprint.dsl({
 const sportsCar = sportsCarFactory.getCar();
 ```
 
-`service-builder` will automatically create, walk and fill the dependency tree in order to create a instances.  Users of the factory do not need to car how instances are built.
+`@shutterstock/mold` will automatically create, walk and fill the dependency tree in order to create a instances.  Users of the factory do not need to car how instances are built.
 
 
 Now that we have a blueprint, we can create new factories with different dependencies:
@@ -203,7 +203,7 @@ expect(mockWheels.rotate).toHaveBeenCalled();
 # Additional Usage
 
 ```
-import builder from 'service-builder'
+import builder from '@shutterstock/mold'
 
 const blueprint = builder({
   breakfast: function (meat, eggs, drink) {
@@ -308,7 +308,7 @@ console.log(factory.$((meat, eggs) => `${eggs} and ${meat}`));
 If any dependencies return a promise, then the promise will be resolved before being used as dependency.  A side effect of this behavior is that any service that depends on a promise will also return a promise.
 
 ```
-import builder from 'service-builder'
+import builder from '@shutterstock/mold'
 
 const blueprint = builder({
   breakfast: function (meat, eggs, drink) {
@@ -352,7 +352,7 @@ anotherFactory.getBreakfast()
 Promise providers work well with async / await
 
 ```
-import builder from 'service-builder'
+import builder from '@shutterstock/mold'
 
 const blueprint = builder({
   breakfast: function (meat, eggs, drink) {
@@ -388,10 +388,10 @@ console.log(await anotherFactory.getBreakfast());
 
 # Surviving Uglification
 
-Minification / uglifying code mangles variable names which breaks being able to resolve dependencies from function names.  The fix is the same as Angular 1.x, to use array style dependencies.  service-builder also supports annotate-ng style tags and is compatible with `ng-annotate` and `babel-plugin-angularjs-annotate`
+Minification / uglifying code mangles variable names which breaks being able to resolve dependencies from function names.  The fix is the same as Angular 1.x, to use array style dependencies.  @shutterstock/mold also supports annotate-ng style tags and is compatible with `ng-annotate` and `babel-plugin-angularjs-annotate`
 
 ```
-import builder from 'service-builder'
+import builder from '@shutterstock/mold'
 
 const blueprint = builder({
   // Array style
