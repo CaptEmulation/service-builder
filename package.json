@@ -3,6 +3,9 @@
   "version": "1.0.0-prerelease.1",
   "description": "Easy dependency injection",
   "repository": "https://github.com/shutterstock/mold",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha",

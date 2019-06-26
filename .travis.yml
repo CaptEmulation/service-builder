@@ -5,6 +5,8 @@ node_js:
   - 12
 before_script:
   - npm run lint
-notifications:
-  email:
-    - john.holmes.dean@gmail.com
+deploy:
+  provider: npm
+  api_key: $SSTK_NPM_TOKEN
+  on:
+    tags: true
