@@ -1,5 +1,7 @@
 [![npm version](https://badge.fury.io/js/shutterstock-mold.svg)](https://badge.fury.io/js/shutterstock-mold) [![Build Status](https://travis-ci.org/shutterstock/mold.svg?branch=master)](https://travis-ci.org/shutterstock/mold)
 
+![logo](./MOLD.png?raw=true)
+
 # Introduction
 
 `shutterstock-mold` is a dependency injection framework that helps developers write factories that satisfy the principle of least privilege for functional arguments. The target audience for this library are those that like having factories but not necessarily writing them. In addition, this library makes writing unit tests with mocked dependencies a breeze.  
