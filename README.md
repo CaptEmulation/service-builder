@@ -97,9 +97,9 @@ Now imagine that `createEngine` and `createWheels` end up needing additional dep
 import builder from 'shutterstock-mold';
 
 const carBlueprint = builder({
-  car(engine, wheels): createCar,
-  engine(cylinders): createEngine,
-  wheels(friction): createWheels,
+  car(engine, wheels) { /* returns a car */ },
+  engine(cylinders) { /* returns an engine */ },
+  wheels(friction) { /* returns wheels */ },
 });
 
 const sportsCarFactory = carBlueprint.dsl({
@@ -141,8 +141,8 @@ With the factory DSL, dependencies do not need to be provided initially.
 
 ```
 const enginelessCarFactory = builder({
-  car(engine, wheels): createCar,
-  wheels(friction): createWheels,
+  car(engine, wheels)  { /* returns a car */ },
+  wheels(friction) { /* returns wheels */ },
 }).dsl({
   friction: 0.9,
 });
@@ -160,9 +160,9 @@ Instead of the DSL syntax, a functional factory can be created.
 
 ```
 const carBlueprint = builder({
-  car(engine, wheels): createCar,
-  engine(cylinders): createEngine,
-  wheels(friction): createWheels,
+  car(engine, wheels) { /* returns a car */ },
+  engine(cylinders) { /* returns an engine */ },
+  wheels(friction) { /* returns wheels */ },
 });
 
 const racingCarFactory = carBlueprint.factory({
@@ -183,9 +183,9 @@ Creating a factory is always a two-step process.  The examples here go from buil
 
 ```
 const carBlueprint = builder({
-  car(engine, wheels): createCar,
-  engine(cylinders): createEngine,
-  wheels(friction): createWheels,
+  car(engine, wheels) { /* returns a car */ },
+  engine(cylinders) { /* returns an engine */ },
+  wheels(friction) { /* returns wheels */ },
 });
 
 // Create factory with mock wheels
